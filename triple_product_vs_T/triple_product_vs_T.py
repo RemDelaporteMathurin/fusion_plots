@@ -290,7 +290,8 @@ def main():
     # ignition: alpha-heating used to sustain fusion reaction with no external heating
     F_ignition  = lambda T_ion, Z_eff: 12.*T_ion**2 / ( get_DT_fusion_reactivity(T_ion*1e-3)*E_alpha
                                                        - 4.*c_br*Z_eff*np.sqrt(T_ion) )
-
+    Q = 1
+    F_breakeven = lambda T_ion, Z_eff: F_ignition(T_ion, Z_eff)/(1+1/Q)
     # bremsstrahlung limit
     # requirement: bremsstrahlung losses < total energy loss rate per unit volume
     #   => P_rad <= W/tau_E
@@ -313,9 +314,17 @@ def main():
     F_ign_Z1    = F_ignition( T_ignition, 1 )
     ax1.fill_between( T_ignition[ F_ign_Z1>0 ]*1e-3, 
                       F_ign_Z1[ F_ign_Z1>0 ]*1e-3 , 
-                      1e22 )
+                      1e22, alpha=0.3)
     ax1.annotate( 'ignition (DT)', xy=( 8.1, 5.3e21), color='.85' )
 
+    # filled area indicating breakeven
+    T_breakeven  = np.logspace( np.log10(1e3), np.log10(100e3), 100 )
+    F_break_Z1    = F_breakeven( T_breakeven, 1 )
+    ax1.fill_between( T_breakeven[ F_break_Z1>0 ]*1e-3, 
+                      F_break_Z1[ F_break_Z1>0 ]*1e-3 , 
+                      1e22, alpha=0.3)
+    ax1.annotate( 'breakeven', xy=(3, 1e21), color='blue', rotation=-20)
+    
     # plot experimental values
     # stellarators
     ax1.plot( T_vals[ device_types == 1 ], nTtau_vals[ device_types == 1 ],
